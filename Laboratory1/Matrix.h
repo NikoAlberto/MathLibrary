@@ -1,6 +1,11 @@
 #pragma once
 #include<vector>
-#include<random>
+#include<iomanip>
+#include<fstream>
+#include <initializer_list> 
+#include <cassert>  
+#include<cstring>
+#include<sstream>
 #include"Exception.h"
 using namespace std;
 class Matrix
@@ -11,41 +16,16 @@ protected:
 	vector<vector<double>> matrix;
 public:
 	
-	Matrix() {
-		int M = 1;
-		int N = 1;
-		matrix = { { 1 } };
-		matrix.resize(1);
-	
-	}
-	
-	Matrix(int m, int n)
-	{
-		this->M = m;
-		this->N = n;
-		matrix.resize(M);
-		for (int i = 0; i < M; i ++)
-		         matrix[i].resize(N);
-			
-	}
+	Matrix();
+	Matrix(int m, int n);
+	Matrix(int m, int n, vector<double> mat);
 
-	Matrix(int m, int n, vector<double> mat) {
-		this->M = m;
-		this->N = n;
 
-		if (M * N != mat.size())
-			throw MyException1();
-		matrix.resize(M);
-		for (int i = 0; i < mat.size(); i+=N)
-		{
-			     matrix[i/N].resize(N);
-			for (int j = 0; j < N; j++)
-			{
-				this->matrix[i/N][j] = mat[j+i];
-			}
-		}
-	}
-
+	Matrix(initializer_list<double> list);
+	int get_Mrows();
+	int get_Ncols();
+	void set_elm(size_t i, size_t j, double a);
+	vector<vector<double>>& get_matrix();
 	//overload
 	friend ostream& operator<<(ostream& cout, Matrix& object);
 	friend Matrix operator+(Matrix& object1, Matrix& object2);
@@ -53,14 +33,9 @@ public:
 	friend Matrix operator*(Matrix& object1, Matrix& object2);
 	
 
-	Matrix& operator*(int num) {
-		for (int i = 0; i < this->M; i++)
-			for (int j = 0; j < this->N; j++)
-		          this->matrix[i][j] *= num;
-		return *this;
-	}
-
-	friend Matrix& operator*(int num, Matrix& object);
+	
+	Matrix& operator*(double num);
+	friend Matrix& operator*(double num, Matrix& object);
 
 	//METHODs
 	//Adamara multiplication
@@ -71,6 +46,8 @@ public:
 	void save_file(string bins);
 	//load
 	void load_file(string bins);
+	//init
+	//Matrix& Matrix(initializer_list<double> list);
 
 	//FRIEND-FUNCTIONS
 	friend void swaprows(Matrix& object, size_t row1, size_t row2);
@@ -88,63 +65,95 @@ public:
 	friend Matrix& matrix_norm(Matrix& object);
 	friend Matrix& vector_norm(Matrix& object);
 	friend Matrix& inverse_matrix(Matrix& object);
+	friend double Mean(Matrix& object, int num);
+	friend double Norm_RCA(Matrix& object, int row);
+	friend Matrix new_matrix_RCA(Matrix& object);
+	friend vector<double> extract_col(Matrix& object, int col);
+	friend Matrix& insert_col(Matrix& object1, Matrix& vec);
 
-	friend Matrix& ReadTextFile(Matrix& object, string filet);//
+	friend Matrix& ReadTextFile(Matrix& object, string filet);
 	friend ofstream& operator<<(string filet, Matrix& object);
+	friend Matrix& operator>>(string filet, Matrix& object);
 
 	friend void CreateBinary(Matrix& object, string bins);
 	friend Matrix& ReadBinaryFile(Matrix& object, string bins);
 };
 
-#include "Overloaded.h"
 
-//Adamara multiplication
-Matrix& Matrix::Adamara(Matrix& object1)
-{
-	if (this->N != object1.N || this->M != object1.M)
-		throw MyException1();
+      void swaprows(Matrix& object, size_t row1, size_t row2);
+	  Matrix& RowReduce(Matrix& object, vector<double>& bearing_vec);
+	 void rowDivision(Matrix& object, size_t row1, double b_el);
+	 void SumRow(Matrix& object, size_t row1, size_t row2, double k);
+	 double scalar_product(Matrix& object1, Matrix& object2);
+	 double trace(Matrix& object);
+	 double vector_module(Matrix& object);
+	 double vector_norm_max(Matrix& object);
+	 double matrix_module(Matrix& object);
+	 double Det(Matrix& object);
+	 Matrix& RowReduce(Matrix& object);
+	 int Rank(Matrix& object);
+	 Matrix& matrix_norm(Matrix& object);
+	 Matrix& vector_norm(Matrix& object);
+	 Matrix& inverse_matrix(Matrix& object);
+	 double Mean(Matrix& object, int num);
+	 double Norm_RCA(Matrix& object, int row);
+	 Matrix new_matrix_RCA(Matrix& object);
+	 vector<double> extract_col(Matrix& object, int col);
+	 Matrix& insert_col(Matrix& object1, Matrix& vec);
 
-	for (int i = 0; i < this->M; i++)
-		for (int j = 0; j < this->N; j++)
-			this->matrix[i][j] = this->matrix[i][j] * object1.matrix[i][j];
-	
-	return *this;
-}
+	 Matrix& ReadTextFile(Matrix& object, string filet);
+	 ofstream& operator<<(string filet, Matrix& object);
+	 Matrix& operator>>(string filet, Matrix& object);
 
-//TRANSPOSE
+	 void CreateBinary(Matrix& object, string bins);
+	 Matrix& ReadBinaryFile(Matrix& object, string bins);
 
-Matrix& Matrix::Transpose() {
+	 ostream& operator<<(ostream& cout, Matrix& object);
+	 Matrix operator+(Matrix& object1, Matrix& object2);
+	 Matrix operator-(Matrix& object1, Matrix& object2);
+	 Matrix operator*(Matrix& object1, Matrix& object2);
+	 Matrix& operator*(double num, Matrix& object);
 
-	int M_temp = this->N;
-	int N_temp = this->M;
-	vector<vector<double>> temp;
-	temp.resize(M_temp);
-	for (size_t i = 0; i < M_temp; i++) {
-		temp[i].resize(N_temp);
-		for (int j = 0; j < N_temp; j++)
-			temp[i][j] = this->matrix[j][i];
-	}
-	this->M = M_temp;
-	this->N = N_temp;
-	this->matrix = temp;
-	temp.resize(this->M);
-	for (size_t i = 0; i < this->M; i++) {
-		matrix[i].resize(this->N);
-		for (int j = 0; j < this->N; j++)
-			this->matrix[i][j] = temp[i][j];
-	}
-	return *this;
-}
+//#include "Overloaded.h"
 
-void Matrix::save_file(string bins) {
-	if (bins.substr(bins.size() - 3, 3) == "txt")
-		throw MyException9();
-	CreateBinary(*this, bins);
-}
+//#include "Semi-class.h"
 
-void Matrix::load_file(string bins) {
+	 class Singles : public Matrix
+	 {
 
-	*this = ReadBinaryFile(*this, bins);
-}
+	 public:
+		 Singles(int m);
+	 };
 
-#include "Semi-class.h"
+	 //Symmetric (filling with random numbers)
+	 class Symmetric : public Matrix {
+
+	 public:
+		 Symmetric(vector<double> sym);
+	 };
+
+	 //Triangular
+
+	 class UpTriangular : public Matrix {
+
+	 public:
+		 UpTriangular(vector<double> Uptr);
+
+	 };
+
+	 class LowTriangular : public Matrix {
+
+	 public:
+		 LowTriangular(vector<double> Uptr);
+
+	 };
+
+
+	 //Diagonal
+
+	 class Diagonal : public Matrix
+	 {
+
+	 public:
+		 Diagonal(vector<double> diagon);
+	 };

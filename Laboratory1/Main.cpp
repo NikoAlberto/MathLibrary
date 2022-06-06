@@ -127,6 +127,8 @@ int main() {
 		new1.load_file("new.dat");
 		cout << new1;
 
+		cout << endl << endl << "***************************************************" << endl << endl;
+		cout << new_matrix_RCA(tested);
 	}
 
 	catch (exception& e) {
